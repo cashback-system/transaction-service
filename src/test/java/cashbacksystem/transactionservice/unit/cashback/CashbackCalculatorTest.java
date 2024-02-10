@@ -1,5 +1,6 @@
-package cashbacksystem.transactionservice.cashback;
+package cashbacksystem.transactionservice.unit.cashback;
 
+import cashbacksystem.transactionservice.cashback.CashbackCalculator;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

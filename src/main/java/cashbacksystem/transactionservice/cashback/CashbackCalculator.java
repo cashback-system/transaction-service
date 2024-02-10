@@ -3,6 +3,7 @@ package cashbacksystem.transactionservice.cashback;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 /**
  * Класс для расчета суммы кэшбека.
@@ -21,9 +22,11 @@ public class CashbackCalculator {
     public BigDecimal calculateCashback(BigDecimal cardCashbackPercent,
                                         BigDecimal categoryCashbackPercent,
                                         BigDecimal transactionSum) {
-        BigDecimal cardCashback = transactionSum.add(transactionSum.multiply(cardCashbackPercent));
-        BigDecimal categoryCashback = transactionSum.add(transactionSum.multiply(categoryCashbackPercent));
+        BigDecimal totalCashbackPercent = cardCashbackPercent
+            .add(categoryCashbackPercent);
 
-        return cardCashback.add(categoryCashback);
+        return transactionSum
+            .multiply(totalCashbackPercent)
+            .divide(BigDecimal.valueOf(100), 2, RoundingMode.DOWN);
     }
 }

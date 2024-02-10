@@ -1,0 +1,3 @@
+[submodule "src/submodules/transfer-contract"]
+	path = src/submodules/transfer-contract
+	url = https://github.com/cashback-system/transfer-contract.git

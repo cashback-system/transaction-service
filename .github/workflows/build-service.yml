@@ -9,6 +9,10 @@ jobs:
     steps:
       - name: Checkout project sources
         uses: actions/checkout@v3
+      - name: Git submodule update
+        run: |
+          git pull --recurse-submodules
+          git submodule update --remote --recursive
       - name: Gradle Wrapper Validation
         uses: gradle/wrapper-validation-action@v1
       - name: Setup Gradle

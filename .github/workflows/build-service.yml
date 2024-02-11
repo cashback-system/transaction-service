@@ -53,6 +53,7 @@ jobs:
           git submodule add https://github.com/cashback-system/transfer-contract.git ./src/submodules/transfer-contract
           git submodule update --init --remote --recursive
           cd ./src/submodules/transfer-contract
+          echo ${GITHUB_REF##*/}
           git checkout ${{ github.event.pull_request.head.ref }}
           git branch
 
@@ -69,4 +70,4 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: Run tests with Gradle Wrapper
-        run: ./gradlew tests
+        run: ./gradlew test

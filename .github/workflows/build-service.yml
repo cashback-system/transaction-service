@@ -22,7 +22,7 @@ jobs:
           git submodule update --init --remote --recursive
           cd ./src/submodules/transfer-contract
           git checkout ${{ github.event.pull_request.head.ref }}
-          cd ..
+          git branch
 
       - name: Gradle Wrapper Validation
         uses: gradle/wrapper-validation-action@v1
@@ -44,5 +44,29 @@ jobs:
     needs: build-gradle-project
 
     steps:
+      - name: Checkout project sources
+        uses: actions/checkout@v3
+
+      - name: Git submodule update
+        run: |
+          ls
+          git submodule add https://github.com/cashback-system/transfer-contract.git ./src/submodules/transfer-contract
+          git submodule update --init --remote --recursive
+          cd ./src/submodules/transfer-contract
+          git checkout ${{ github.event.pull_request.head.ref }}
+          git branch
+
+      - name: Gradle Wrapper Validation
+        uses: gradle/wrapper-validation-action@v1
+
+      - name: Setup Gradle
+        uses: spring-io/spring-gradle-build-action@v2
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Set chmod +x
+        run: chmod +x ./gradlew
+
       - name: Run tests with Gradle Wrapper
-        run: ./gradlew test
+        run: ./gradlew tests

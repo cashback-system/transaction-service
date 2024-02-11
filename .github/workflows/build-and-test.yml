@@ -1,0 +1,67 @@
+name: Build Gradle project
+
+on:
+  push:
+    branches:
+      - dev
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout project sources
+        uses: actions/checkout@v3
+
+      - name: Git submodule update
+        run: |
+          git submodule add https://github.com/cashback-system/transfer-contract.git ./src/submodules/transfer-contract
+          git submodule update --init --remote --recursive
+          cd ./src/submodules/transfer-contract
+          echo ${GITHUB_REF##*/}
+          git checkout ${GITHUB_REF##*/}
+
+      - name: Gradle Wrapper Validation
+        uses: gradle/wrapper-validation-action@v1
+
+      - name: Setup Gradle
+        uses: spring-io/spring-gradle-build-action@v2
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Set chmod +x
+        run: chmod +x ./gradlew
+
+      - name: Run build with Gradle Wrapper
+        run: ./gradlew build
+
+  test:
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Checkout project sources
+        uses: actions/checkout@v3
+
+      - name: Git submodule update
+        run: |
+          git submodule add https://github.com/cashback-system/transfer-contract.git ./src/submodules/transfer-contract
+          git submodule update --init --remote --recursive
+          cd ./src/submodules/transfer-contract
+          echo ${GITHUB_REF##*/}
+          git checkout ${GITHUB_REF##*/}
+
+      - name: Gradle Wrapper Validation
+        uses: gradle/wrapper-validation-action@v1
+
+      - name: Setup Gradle
+        uses: spring-io/spring-gradle-build-action@v2
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Set chmod +x
+        run: chmod +x ./gradlew
+
+      - name: Run tests with Gradle Wrapper
+        run: ./gradlew test

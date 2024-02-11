@@ -16,8 +16,9 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Git submodule update
-        uses: actions/checkout@v3
         run: |
+          ls
+          git submodule add https://github.com/cashback-system/transfer-contract.git ./src/submodules/transfer-contract
           git submodule update --init --remote --recursive
           cd ./src/submodules/transfer-contract
           git checkout ${{ github.event.pull_request.head.ref }}

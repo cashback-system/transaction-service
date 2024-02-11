@@ -2,6 +2,11 @@ name: Build Gradle project
 
 on:
   push:
+    branches:
+      - dev
+  pull_request:
+    branches:
+      - main
 
 jobs:
   build-gradle-project:
@@ -9,18 +14,25 @@ jobs:
     steps:
       - name: Checkout project sources
         uses: actions/checkout@v3
+
       - name: Git submodule update
         run: |
-          git pull --recurse-submodules
           git submodule update --init --remote --recursive
+          cd ./src/submodules/transfer-contract
+          git checkout ${{ github.event.pull_request.head.ref }}
+          cd ..
+
       - name: Gradle Wrapper Validation
         uses: gradle/wrapper-validation-action@v1
+
       - name: Setup Gradle
         uses: spring-io/spring-gradle-build-action@v2
         with:
           java-version: '21'
           distribution: 'temurin'
+
       - name: Set chmod +x
         run: chmod +x ./gradlew
+
       - name: Run build with Gradle Wrapper
         run: ./gradlew build

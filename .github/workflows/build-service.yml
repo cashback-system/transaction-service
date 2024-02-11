@@ -38,3 +38,11 @@ jobs:
 
       - name: Run build with Gradle Wrapper
         run: ./gradlew build
+
+  test-gradle-project:
+    runs-on: ubuntu-latest
+    needs: build-gradle-project
+
+    steps:
+      - name: Run tests with Gradle Wrapper
+        run: ./gradlew test

@@ -2,6 +2,8 @@ package cashbacksystem.transactionservice.integration.transaction;
 
 import cashbacksystem.transactionservice.cashback.CashbackCalculator;
 import cashbacksystem.transactionservice.transaction.TransactionController;
+import cashbacksystem.transactionservice.transaction.TransactionMapper;
+import cashbacksystem.transactionservice.transaction.TransactionRepository;
 import cashbacksystem.transactionservice.transaction.TransactionService;
 import cashbacksystem.transfer.api.CardApi;
 import cashbacksystem.transfer.api.CategoryApi;
@@ -14,6 +16,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
@@ -22,10 +27,19 @@ import java.util.UUID;
 /**
  * Тест для проверки работы контроллера транзакций.
  */
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@ActiveProfiles("test")
 public class TransactionControllerTest {
 
     private final CardApi cardApi = Mockito.mock(CardApi.class);
     private final CategoryApi categoryApi = Mockito.mock(CategoryApi.class);
+
+    @Autowired
+    private TransactionRepository transactionRepository;
+
+    @Autowired
+    private TransactionMapper transactionMapper;
+
     private final CashbackCalculator cashbackCalculator =
         new CashbackCalculator();
 
@@ -37,6 +51,8 @@ public class TransactionControllerTest {
             new TransactionService(
                 cardApi,
                 categoryApi,
+                transactionRepository,
+                transactionMapper,
                 cashbackCalculator
             )
         );
@@ -64,7 +80,9 @@ public class TransactionControllerTest {
                 .withTime(ZonedDateTime.now())
                 .withCard(cardApi.getCardById(UUID.randomUUID()))
                 .withCategory(categoryApi.getCategoryById(UUID.randomUUID()))
-                .withSum(BigDecimal.valueOf(19999.99))
+                .withAmount(BigDecimal.valueOf(19999.99))
                 .build()).cashbackValue());
+
+        Assertions.assertEquals(1, transactionRepository.findAll().size());
     }
 }

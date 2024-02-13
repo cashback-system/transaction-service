@@ -15,6 +15,8 @@ import org.springframework.stereotype.Service;
 public class TransactionService {
     private final CardApi cardApi;
     private final CategoryApi categoryApi;
+    private final TransactionRepository transactionRepository;
+    private final TransactionMapper transactionMapper;
     private final CashbackCalculator cashbackCalculator;
 
     /**
@@ -26,10 +28,12 @@ public class TransactionService {
     public CashbackDTO calculateCashback(TransactionDTO transaction) {
         CardDTO card = cardApi.getCardById(transaction.card().id());
         CategoryDTO category = categoryApi.getCategoryById(transaction.category().id());
+        TransactionEntity entity = transactionMapper.convert(transaction);
+        transactionRepository.save(entity);
 
         return CashbackDTO.builder()
             .withCashbackValue(cashbackCalculator.calculateCashback(
-                card.cashbackPercent(), category.cashbackPercent(), transaction.sum()
+                card.cashbackPercent(), category.cashbackPercent(), transaction.amount()
             ))
             .build();
     }

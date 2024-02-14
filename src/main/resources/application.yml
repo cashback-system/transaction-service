@@ -1,7 +1,9 @@
 microservice:
+  transaction-api:
+    url: https://localhost:8080
   card-api:
-    url: https://localhost:8081/
+    url: https://localhost:8081
   category-api:
-    url: https://localhost:8082/
+    url: https://localhost:8082
 server:
   port: 8080

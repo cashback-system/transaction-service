@@ -7,8 +7,12 @@ import cashbacksystem.transfer.card.CardDTO;
 import cashbacksystem.transfer.cashback.CashbackDTO;
 import cashbacksystem.transfer.category.CategoryDTO;
 import cashbacksystem.transfer.transaction.TransactionDTO;
+import cashbacksystem.transfer.transaction.TransactionSearchParams;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -26,15 +30,28 @@ public class TransactionService {
      * @return данные о кэшбеке
      */
     public CashbackDTO calculateCashback(TransactionDTO transaction) {
-        CardDTO card = cardApi.getCardById(transaction.card().id());
-        CategoryDTO category = categoryApi.getCategoryById(transaction.category().id());
-        TransactionEntity entity = transactionMapper.convert(transaction);
+        CardDTO card = cardApi.getCardById(transaction.getCard().id());
+        CategoryDTO category = categoryApi.getCategoryById(transaction.getCategory().id());
+        TransactionEntity entity = transactionMapper.convertFromDto(transaction);
         transactionRepository.save(entity);
 
         return CashbackDTO.builder()
             .withCashbackValue(cashbackCalculator.calculateCashback(
-                card.cashbackPercent(), category.cashbackPercent(), transaction.amount()
+                card.cashbackPercent(), category.cashbackPercent(), transaction.getAmount()
             ))
             .build();
+    }
+
+    /**
+     * Поиск транзакций по параметрам.
+     *
+     * @param params - параметры поиска
+     * @return найденные транзакции
+     */
+    public List<TransactionDTO> searchByParams(TransactionSearchParams params) {
+        return transactionRepository
+            .findAllByCardIdAndTimeBetween(params.card().id(), params.startTime(), params.endTime())
+            .stream().map(entity -> transactionMapper.convertFromEntity(new TransactionDTO(), entity))
+            .collect(Collectors.toList());
     }
 }

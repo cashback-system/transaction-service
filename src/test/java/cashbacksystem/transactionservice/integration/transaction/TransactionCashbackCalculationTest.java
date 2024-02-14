@@ -19,17 +19,24 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.jdbc.Sql;
+import org.springframework.test.context.jdbc.SqlConfig;
 
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
 import java.util.UUID;
 
 /**
- * Тест для проверки работы контроллера транзакций.
+ * Тест для проверки расчета кэшбека по транзакции.
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
-public class TransactionControllerTest {
+@Sql(
+    scripts = "classpath:sql/clear-all.sql",
+    executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD,
+    config = @SqlConfig(encoding = "UTF-8")
+)
+public class TransactionCashbackCalculationTest {
 
     private final CardApi cardApi = Mockito.mock(CardApi.class);
     private final CategoryApi categoryApi = Mockito.mock(CategoryApi.class);
@@ -39,9 +46,6 @@ public class TransactionControllerTest {
 
     @Autowired
     private TransactionMapper transactionMapper;
-
-    private final CashbackCalculator cashbackCalculator =
-        new CashbackCalculator();
 
     private TransactionController transactionController;
 
@@ -53,7 +57,7 @@ public class TransactionControllerTest {
                 categoryApi,
                 transactionRepository,
                 transactionMapper,
-                cashbackCalculator
+                new CashbackCalculator()
             )
         );
     }
@@ -77,6 +81,7 @@ public class TransactionControllerTest {
 
         Assertions.assertEquals(BigDecimal.valueOf(799.99),
             transactionController.calculateCashback(TransactionDTO.builder()
+                .withId(UUID.randomUUID())
                 .withTime(ZonedDateTime.now())
                 .withCard(cardApi.getCardById(UUID.randomUUID()))
                 .withCategory(categoryApi.getCategoryById(UUID.randomUUID()))
